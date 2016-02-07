@@ -48,12 +48,13 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 
 	@Override
 	public List<String> generateSentence() {
-		System.out.println("WARNING -- DUMMY PLACEHOLDER IMPLEMENTATION");
 		final List<String> sentence = new ArrayList<String>();
-		String word = generateWord();
+		Object[] keys = bigramCounter.keySet().toArray();
+		int rdmIndex = (int) (Math.random() * keys.length);
+		String word = generateBigramWord((String) keys[rdmIndex]);
 		while (!word.equals(STOP)) {
 			sentence.add(word);
-			word = generateWord();
+			word = generateBigramWord(word);
 		}
 		return sentence;
 	}
@@ -104,5 +105,23 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 			}
 		}
 		return UNKNOWN;
+	}
+
+	/**among list of words that follow the given word randomly choose next word**/
+	String generateBigramWord(String key) {
+
+		if(bigramCounter.containsKey(key)) {
+			Counter<String> counter = bigramCounter.getCounter(key);
+			if(counter.isEmpty()) {
+				return generateWord();
+			}
+			//randomly chooses instead of taking the argmax, otherwise generated sentences will be relatively the same
+			Object[] keys = counter.keySet().toArray();
+			int rdmIndex = (int) (Math.random() * keys.length);
+			return (String) keys[rdmIndex];
+
+		} else {
+			return generateWord();
+		}
 	}
 }

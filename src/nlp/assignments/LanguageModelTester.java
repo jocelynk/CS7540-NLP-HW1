@@ -130,9 +130,9 @@ public class LanguageModelTester {
 		final double wordErrorRate = calculateWordErrorRate(languageModel,
 				speechNBestLists, verbose);
 		System.out.println("HUB Word Error Rate: " + wordErrorRate);
-		// System.out.println("Generated Sentences:");
-		// for (int i = 0; i < 10; i++)
-		// System.out.println(" " + languageModel.generateSentence());
+		System.out.println("Generated Sentences:");
+		for (int i = 0; i < 10; i++)
+			System.out.println(" " + languageModel.generateSentence());
 	}
 
 	private static void displayHypothesis(String prefix, List<String> guess,

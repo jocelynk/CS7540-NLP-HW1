@@ -40,11 +40,11 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 				final String word = stoppedSentence.get(i);
 				wordCounter.incrementCount(word, 1.0);
 				bigramCounter.incrementCount(previousWord, word, 1.0);
-				trigramCounter.incrementCount(prePreviousWord + previousWord,
+				trigramCounter.incrementCount(prePreviousWord + " " + previousWord,
 						word, 1.0);
 				wordCounterUnNorm.incrementCount(word, 1.0);
 				bigramCounterUnNorm.incrementCount(previousWord, word, 1.0);
-				trigramCounterUnNorm.incrementCount(prePreviousWord + previousWord,
+				trigramCounterUnNorm.incrementCount(prePreviousWord + " " + previousWord,
 						word, 1.0);
 				prePreviousWord = previousWord;
 				previousWord = word;
@@ -57,12 +57,19 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 
 	@Override
 	public List<String> generateSentence() {
-		System.out.println("WARNING -- DUMMY PLACEHOLDER IMPLEMENTATION");
 		final List<String> sentence = new ArrayList<String>();
-		String word = generateWord();
+		Object[] keys = trigramCounter.keySet().toArray();
+		int rdmIndex = (int) (Math.random() * keys.length);
+		String[] words = ((String)keys[rdmIndex]).split(" ");
+		String prePreviousWord = words.length > 0? words[0] : "";
+		String previousWord = words.length > 1? words[1] : "";
+		String word = generateTrigramWord(prePreviousWord, previousWord);
+		sentence.add(prePreviousWord);
+		sentence.add(previousWord);
 		while (!word.equals(STOP)) {
+
 			sentence.add(word);
-			word = generateWord();
+			word = generateTrigramWord(previousWord, word);
 		}
 		return sentence;
 	}
@@ -89,7 +96,7 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 	public double getTrigramProbability(String prePreviousWord,
 			String previousWord, String word) {
 		final double trigramCount = trigramCounter
-				.getCount(prePreviousWord + previousWord, word);
+				.getCount(prePreviousWord + " " + previousWord, word);
 		final double bigramCount = bigramCounter.getCount(previousWord, word);
 		double unigramCount = wordCounter.getCount(word);
 		if (unigramCount == 0) {
@@ -98,7 +105,7 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 		}
 
 		//Adding Witten-Bell Smoothing
-		Counter<String> triCounter = trigramCounterUnNorm.getCounter(prePreviousWord + previousWord);
+		Counter<String> triCounter = trigramCounterUnNorm.getCounter(prePreviousWord + " " + previousWord);
 		double estLambda1 = triCounter.size() != 0? 1 - (triCounter.size()/(triCounter.size() + triCounter.totalCount())): 0;
 
 		Counter<String> biCounter = bigramCounterUnNorm.getCounter(previousWord);
@@ -132,5 +139,39 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 			}
 		}
 		return UNKNOWN;
+	}
+
+	/**among list of words that follow the given word randomly choose next word**/
+	String generateBigramWord(String key) {
+
+		if(bigramCounter.containsKey(key)) {
+			Counter<String> counter = bigramCounter.getCounter(key);
+			if(counter.isEmpty()) {
+				return generateWord();
+			}
+			//randomly chooses instead of taking the argmax, otherwise generated sentences will be relatively the same
+			Object[] keys = counter.keySet().toArray();
+			int rdmIndex = (int) (Math.random() * keys.length);
+			return (String) keys[rdmIndex];
+
+		} else {
+			return generateWord();
+		}
+	}
+
+	String generateTrigramWord(String prePreviousWord, String previousWord) {
+		if(trigramCounter.containsKey(prePreviousWord + " " + previousWord)) {
+			Counter<String> counter = trigramCounter.getCounter(prePreviousWord + " " + previousWord);
+			if(counter.isEmpty()) {
+				return generateBigramWord(previousWord);
+			}
+			//randomly chooses instead of taking the argmax, otherwise generated sentences will be relatively the same
+			Object[] keys = counter.keySet().toArray();
+			int rdmIndex = (int) (Math.random() * keys.length);
+			return (String) keys[rdmIndex];
+
+		} else { //fallback to bigram generation
+			return generateBigramWord(previousWord);
+		}
 	}
 }
