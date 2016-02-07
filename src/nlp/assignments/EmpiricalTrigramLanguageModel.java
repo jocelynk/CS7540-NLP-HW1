@@ -22,6 +22,9 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 	CounterMap<String, String>	bigramCounter	= new CounterMap<String, String>();
 	CounterMap<String, String>	trigramCounter	= new CounterMap<String, String>();
 	Counter<String>				wordCounter		= new Counter<String>();
+	CounterMap<String, String>	bigramCounterUnNorm	= new CounterMap<String, String>();
+	CounterMap<String, String>	trigramCounterUnNorm	= new CounterMap<String, String>();
+	Counter<String>				wordCounterUnNorm		= new Counter<String>();
 
 	public EmpiricalTrigramLanguageModel(
 			Collection<List<String>> sentenceCollection) {
@@ -39,11 +42,16 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 				bigramCounter.incrementCount(previousWord, word, 1.0);
 				trigramCounter.incrementCount(prePreviousWord + previousWord,
 						word, 1.0);
+				wordCounterUnNorm.incrementCount(word, 1.0);
+				bigramCounterUnNorm.incrementCount(previousWord, word, 1.0);
+				trigramCounterUnNorm.incrementCount(prePreviousWord + previousWord,
+						word, 1.0);
 				prePreviousWord = previousWord;
 				previousWord = word;
 			}
 		}
 		wordCounter.incrementCount(UNKNOWN, 1.0);
+		wordCounterUnNorm.incrementCount(UNKNOWN, 1.0);
 		normalizeDistributions();
 	}
 
@@ -88,8 +96,20 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 			System.out.println("UNKNOWN Word: " + word);
 			unigramCount = wordCounter.getCount(UNKNOWN);
 		}
-		return lambda1 * trigramCount + lambda2 * bigramCount
-				+ (1.0 - lambda1 - lambda2) * unigramCount;
+
+		//Adding Witten-Bell Smoothing
+		Counter<String> triCounter = trigramCounterUnNorm.getCounter(prePreviousWord + previousWord);
+		double estLambda1 = triCounter.size() != 0? 1 - (triCounter.size()/(triCounter.size() + triCounter.totalCount())): 0;
+
+		Counter<String> biCounter = bigramCounterUnNorm.getCounter(previousWord);
+		double estLambda2 = 1 - (biCounter.size()/(biCounter.size() + biCounter.totalCount()));
+		estLambda2 *= (1-estLambda1);
+
+		return estLambda1 * trigramCount + estLambda2 * bigramCount
+				+ (1.0 - estLambda1 - estLambda2) * unigramCount;
+
+		//return lambda1 * trigramCount + lambda2 * bigramCount
+		//		+ (1.0 - lambda1 - lambda2) * unigramCount;
 	}
 
 	private void normalizeDistributions() {

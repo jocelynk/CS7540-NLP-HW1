@@ -3,6 +3,7 @@ package nlp.assignments;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import nlp.langmodel.LanguageModel;
 import nlp.util.Counter;
@@ -20,6 +21,8 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 
 	CounterMap<String, String>	bigramCounter	= new CounterMap<String, String>();
 	Counter<String>				wordCounter		= new Counter<String>();
+	CounterMap<String, String>	bigramCounterUnNorm = new CounterMap<String, String>();
+	Counter<String>				wordCounterUnNorm = new Counter<String>();
 
 	public EmpiricalBigramLanguageModel(
 			Collection<List<String>> sentenceCollection) {
@@ -33,10 +36,13 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 				final String word = stoppedSentence.get(i);
 				wordCounter.incrementCount(word, 1.0);
 				bigramCounter.incrementCount(previousWord, word, 1.0);
+				wordCounterUnNorm.incrementCount(word, 1.0);
+				bigramCounterUnNorm.incrementCount(previousWord, word, 1.0);
 				previousWord = word;
 			}
 		}
 		wordCounter.incrementCount(UNKNOWN, 1.0);
+		wordCounterUnNorm.incrementCount(UNKNOWN, 1.0);
 		normalizeDistributions();
 	}
 
@@ -59,6 +65,10 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 			System.out.println("UNKNOWN Word: " + word);
 			unigramCount = wordCounter.getCount(UNKNOWN);
 		}
+
+		//Add Witten-Bell Smoothing
+		Counter<String> counter = bigramCounterUnNorm.getCounter(previousWord);
+		double estLambda = counter.size() != 0? (counter.size()/(counter.size() + counter.totalCount())) : 0;
 		return lambda * bigramCount + (1.0 - lambda) * unigramCount;
 	}
 
