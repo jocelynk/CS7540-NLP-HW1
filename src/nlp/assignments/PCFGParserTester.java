@@ -45,7 +45,7 @@ public class PCFGParserTester {
 		}
 
 		private Tree<String> buildRightBranchParse(List<String> words,
-				List<String> tags) {
+												   List<String> tags) {
 			int currentPosition = words.size() - 1;
 			Tree<String> rightBranchTree = buildTagTree(words, tags,
 					currentPosition);
@@ -74,7 +74,7 @@ public class PCFGParserTester {
 		}
 
 		private Tree<String> buildTagTree(List<String> words,
-				List<String> tags, int currentPosition) {
+										  List<String> tags, int currentPosition) {
 			Tree<String> leafTree = new Tree<String>(words.get(currentPosition));
 			Tree<String> tagTree = new Tree<String>(tags.get(currentPosition),
 					Collections.singletonList(leafTree));
@@ -188,7 +188,7 @@ public class PCFGParserTester {
 		}
 
 		private static Tree<String> binarizeTreeHelper(Tree<String> tree,
-				int numChildrenGenerated, String intermediateLabel) {
+													   int numChildrenGenerated, String intermediateLabel) {
 			Tree<String> leftTree = tree.getChildren()
 					.get(numChildrenGenerated);
 			List<Tree<String>> children = new ArrayList<Tree<String>>();
@@ -394,9 +394,9 @@ public class PCFGParserTester {
 		}
 
 		private void tallyTree(Tree<String> tree,
-				Counter<String> symbolCounter,
-				Counter<UnaryRule> unaryRuleCounter,
-				Counter<BinaryRule> binaryRuleCounter) {
+							   Counter<String> symbolCounter,
+							   Counter<UnaryRule> unaryRuleCounter,
+							   Counter<BinaryRule> binaryRuleCounter) {
 			if (tree.isLeaf())
 				return;
 			if (tree.isPreTerminal())
@@ -678,7 +678,7 @@ public class PCFGParserTester {
 		}
 
 		private static List<String> extractPath(UnaryRule unaryRule,
-				Map<UnaryRule, String> intermediateStates) {
+												Map<UnaryRule, String> intermediateStates) {
 			List<String> path = new ArrayList<String>();
 			path.add(unaryRule.getParent());
 			String intermediateState = intermediateStates.get(unaryRule);
@@ -692,7 +692,7 @@ public class PCFGParserTester {
 				}
 				path.add(intermediateState);
 				List<String> childPath = extractPath(new UnaryRule(
-						intermediateState, unaryRule.getChild()),
+								intermediateState, unaryRule.getChild()),
 						intermediateStates);
 				for (int i = 1; i < childPath.size() - 1; i++) {
 					String state = childPath.get(i);
@@ -707,13 +707,13 @@ public class PCFGParserTester {
 		}
 
 		private static void relax(Counter<UnaryRule> pathCosts,
-				Map<UnaryRule, String> intermediateStates,
-				Map<String, List<UnaryRule>> closedUnaryRulesByChild,
-				Map<String, List<UnaryRule>> closedUnaryRulesByParent,
-				UnaryRule unaryRule, String intermediateState, double newScore) {
+								  Map<UnaryRule, String> intermediateStates,
+								  Map<String, List<UnaryRule>> closedUnaryRulesByChild,
+								  Map<String, List<UnaryRule>> closedUnaryRulesByParent,
+								  UnaryRule unaryRule, String intermediateState, double newScore) {
 			if (intermediateState != null
 					&& (intermediateState.equals(unaryRule.getParent()) || intermediateState
-							.equals(unaryRule.getChild())))
+					.equals(unaryRule.getChild())))
 				return;
 			boolean isNewRule = !pathCosts.containsKey(unaryRule);
 			double oldScore = (isNewRule ? Double.NEGATIVE_INFINITY : pathCosts
@@ -799,7 +799,7 @@ public class PCFGParserTester {
 	}
 
 	private static void testParser(Parser parser, List<Tree<String>> testTrees,
-			boolean verbose) {
+								   boolean verbose) {
 		EnglishPennTreebankParseEvaluator.LabeledConstituentEval<String> eval = new EnglishPennTreebankParseEvaluator.LabeledConstituentEval<String>(
 				Collections.singleton("ROOT"),
 				new HashSet<String>(Arrays.asList(new String[] { "''", "``",
@@ -819,7 +819,7 @@ public class PCFGParserTester {
 	}
 
 	private static List<Tree<String>> readTrees(String basePath, int low,
-			int high, int maxLength) {
+												int high, int maxLength) {
 		Collection<Tree<String>> trees = PennTreebankReader.readTrees(basePath,
 				low, high);
 		// normalize trees

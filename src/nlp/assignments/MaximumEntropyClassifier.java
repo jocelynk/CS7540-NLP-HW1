@@ -83,7 +83,7 @@ public class MaximumEntropyClassifier<I, F, L> implements
 		}
 
 		private EncodedDatum[] encodeData(List<LabeledInstance<I, L>> data,
-				Encoding<F, L> encoding) {
+										  Encoding<F, L> encoding) {
 			EncodedDatum[] encodedData = new EncodedDatum[data.size()];
 			for (int i = 0; i < data.size(); i++) {
 				LabeledInstance<I, L> labeledInstance = data.get(i);
@@ -108,7 +108,7 @@ public class MaximumEntropyClassifier<I, F, L> implements
 		 * optimization code can take before stopping.
 		 */
 		public Factory(double sigma, int iterations,
-				FeatureExtractor<I, F> featureExtractor) {
+					   FeatureExtractor<I, F> featureExtractor) {
 			this.sigma = sigma;
 			this.iterations = iterations;
 			this.featureExtractor = featureExtractor;
@@ -197,7 +197,7 @@ public class MaximumEntropyClassifier<I, F, L> implements
 		}
 
 		public ObjectiveFunction(Encoding<F, L> encoding, EncodedDatum[] data,
-				IndexLinearizer indexLinearizer, double sigma) {
+								 IndexLinearizer indexLinearizer, double sigma) {
 			this.indexLinearizer = indexLinearizer;
 			this.encoding = encoding;
 			this.data = data;
@@ -269,7 +269,7 @@ public class MaximumEntropyClassifier<I, F, L> implements
 		}
 
 		public EncodedDatum(int labelIndex, int[] featureIndexes,
-				double[] featureCounts) {
+							double[] featureCounts) {
 			this.labelIndex = labelIndex;
 			this.featureIndexes = featureIndexes;
 			this.featureCounts = featureCounts;
@@ -364,8 +364,8 @@ public class MaximumEntropyClassifier<I, F, L> implements
 	 * activations) are *almost* log probabilities, but need to be normalized.
 	 */
 	private static <F, L> double[] getLogProbabilities(EncodedDatum datum,
-			double[] weights, Encoding<F, L> encoding,
-			IndexLinearizer indexLinearizer) {
+													   double[] weights, Encoding<F, L> encoding,
+													   IndexLinearizer indexLinearizer) {
 		// TODO: apply the classifier to this feature vector
 		// TODO
 		// TODO
@@ -412,8 +412,8 @@ public class MaximumEntropyClassifier<I, F, L> implements
 	}
 
 	public MaximumEntropyClassifier(double[] weights, Encoding<F, L> encoding,
-			IndexLinearizer indexLinearizer,
-			FeatureExtractor<I, F> featureExtractor) {
+									IndexLinearizer indexLinearizer,
+									FeatureExtractor<I, F> featureExtractor) {
 		this.weights = weights;
 		this.encoding = encoding;
 		this.indexLinearizer = indexLinearizer;

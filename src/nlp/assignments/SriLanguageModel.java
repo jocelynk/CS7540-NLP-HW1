@@ -86,7 +86,7 @@ class SriLanguageModel implements LanguageModel {
 	}
 
 	public double getTrigramProbability(String prePreviousWord,
-			String previousWord, String word) {
+										String previousWord, String word) {
 		final double trigramProbability = probabilities
 				.getCount(prePreviousWord + " " + previousWord + " " + word);
 		if (trigramProbability != 0) {

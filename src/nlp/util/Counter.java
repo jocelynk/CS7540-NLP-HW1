@@ -23,7 +23,7 @@ public class Counter<E> implements Serializable {
 
 	/**
 	 * The elements in the counter.
-	 * 
+	 *
 	 * @return set of keys
 	 */
 	public Set<E> keySet() {
@@ -51,7 +51,7 @@ public class Counter<E> implements Serializable {
 	 * way to distinguish keys which are in the counter with count zero, and
 	 * those which are not in the counter (and will therefore return count zero
 	 * from getCount().
-	 * 
+	 *
 	 * @param key
 	 * @return whether the counter contains the key
 	 */
@@ -62,7 +62,7 @@ public class Counter<E> implements Serializable {
 	/**
 	 * Remove a key from the counter. Returns the count associated with that key
 	 * or zero if the key wasn't in the counter to begin with
-	 * 
+	 *
 	 * @param key
 	 * @return the count associated with the key
 	 */
@@ -74,7 +74,7 @@ public class Counter<E> implements Serializable {
 	/**
 	 * Get the count of the element, or zero if the element is not in the
 	 * counter.
-	 * 
+	 *
 	 * @param key
 	 * @return
 	 */
@@ -87,7 +87,7 @@ public class Counter<E> implements Serializable {
 
 	/**
 	 * Set the count for the given key, clobbering any previous count.
-	 * 
+	 *
 	 * @param key
 	 * @param count
 	 */
@@ -98,7 +98,7 @@ public class Counter<E> implements Serializable {
 
 	/**
 	 * Increment a key's count by the given amount.
-	 * 
+	 *
 	 * @param key
 	 * @param increment
 	 */
@@ -135,7 +135,7 @@ public class Counter<E> implements Serializable {
 	 * Finds the total of all counts in the counter. This implementation uses
 	 * cached count which may get out of sync if the entries map is modified in
 	 * some unantipicated way.
-	 * 
+	 *
 	 * @return the counter's total
 	 */
 	public double totalCount() {
@@ -172,7 +172,7 @@ public class Counter<E> implements Serializable {
 	/**
 	 * Finds the key with maximum count. This is a linear operation, and ties
 	 * are broken arbitrarily.
-	 * 
+	 *
 	 * @return a key with minumum count
 	 */
 	public E argMax() {
@@ -190,7 +190,7 @@ public class Counter<E> implements Serializable {
 	/**
 	 * Returns a string representation with the keys ordered by decreasing
 	 * counts.
-	 * 
+	 *
 	 * @return string representation
 	 */
 	public String toString() {
@@ -200,7 +200,7 @@ public class Counter<E> implements Serializable {
 	/**
 	 * Returns a string representation which includes no more than the
 	 * maxKeysToPrint elements with largest counts.
-	 * 
+	 *
 	 * @param maxKeysToPrint
 	 * @return partial string representation
 	 */
@@ -223,7 +223,7 @@ public class Counter<E> implements Serializable {
 	/**
 	 * Entry sets are an efficient way to iterate over the key-value pairs in a
 	 * map
-	 * 
+	 *
 	 * @return entrySet
 	 */
 	public Set<Entry<E, Double>> getEntrySet() {

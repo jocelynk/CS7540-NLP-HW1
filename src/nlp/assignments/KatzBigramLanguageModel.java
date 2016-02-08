@@ -9,21 +9,20 @@ import nlp.util.Counter;
 import nlp.util.CounterMap;
 
 /**
- * Katz-backoff bigram language model.
+ * A vanilla Katz Bigram Language model
  */
-class KatzBigramLanguageModel implements LanguageModel {
+public class KatzBigramLanguageModel implements LanguageModel {
 
-	static final int			cutOff					= 5;
+	static final double			beta					= 0.1;
 	static final String			START					= "<S>";
 	static final String			STOP					= "</S>";
 	static final String			UNKNOWN					= "*UNKNOWN*";
 
-	Counter<String>				backoffs				= new Counter<String>();
+	Counter<String>				alpha					= new Counter<String>();
 	CounterMap<String, String>	bigramCounter			= new CounterMap<String, String>();
-	Counter<String>				discountedBigramCounter	= new Counter<String>();
 	Counter<String>				discountedWordCounter	= new Counter<String>();
-	Counter<String>				probabilities			= new Counter<String>();
 	Counter<String>				wordCounter				= new Counter<String>();
+	Counter<String>				z						= new Counter<String>();
 
 	public KatzBigramLanguageModel(
 			Collection<List<String>> sentenceCollection) {
@@ -32,61 +31,65 @@ class KatzBigramLanguageModel implements LanguageModel {
 					sentence);
 			stoppedSentence.add(0, START);
 			stoppedSentence.add(STOP);
+			wordCounter.incrementCount(START, 1.0);
 			String previousWord = stoppedSentence.get(0);
 			for (int i = 1; i < stoppedSentence.size(); i++) {
 				final String word = stoppedSentence.get(i);
 				wordCounter.incrementCount(word, 1.0);
-				discountedWordCounter.incrementCount(word, 1.0);
-				discountedBigramCounter
-						.incrementCount(previousWord + " " + word, 1.0);
 				bigramCounter.incrementCount(previousWord, word, 1.0);
+				discountedWordCounter.incrementCount(word, 1.0);
 				previousWord = word;
 			}
 		}
 		normalizeDistributions();
 	}
 
-	private static void verifyProbability(double prob) {
-		if (Double.isNaN(prob) || Double.isInfinite(prob) || prob < 0) {
-			throw new IllegalStateException("Invalid probability: " + prob);
-		}
-	}
-
 	@Override
 	public List<String> generateSentence() {
-		System.out.println("WARNING -- DUMMY PLACEHOLDER IMPLEMENTATION");
 		final List<String> sentence = new ArrayList<String>();
-		String word = generateWord();
+		String word = generateWord(START);
 		while (!word.equals(STOP)) {
 			sentence.add(word);
-			word = generateWord();
+			word = generateWord(word);
 		}
 		return sentence;
 	}
 
+	/**
+	 * If c(u,v) > 0 then results are given by:
+	 * prob(v|u) = c*(u,v)/c(u)
+	 * else prob(v|u) = alpha(u) * [c(v)]/\sum_{v'; c(u,v') = 0} c(v')]
+	 * where c*(u,v) = c(u,v) - beta
+	 * alpha(u) = 1 - \sum_v c*(u,v)/c(u)
+	 *
+	 * the counts c(u) are computed using 1-smoothing.
+	 */
 	public double getBigramProbability(String previousWord, String word) {
-		final double bigramProbability = probabilities
-				.getCount(previousWord + " " + word);
-		verifyProbability(bigramProbability);
 
-		if (bigramProbability != 0) {
-			return bigramProbability;
+		if (this.wordCounter.getCount(word) == 0) {
+			word = UNKNOWN;
 		}
 
-		double unigramProbability = probabilities.getCount(word);
-		if (unigramProbability == 0) {
-			// System.out.println("UNKNOWN Word: " + word);
-			unigramProbability = probabilities.getCount(UNKNOWN);
+		if (this.wordCounter.getCount(previousWord) == 0) {
+			previousWord = UNKNOWN;
 		}
-		verifyProbability(unigramProbability);
 
-		double backoff = backoffs.getCount(previousWord);
-		if (backoff == 0.0) {
-			if (probabilities.getCount(previousWord) == 0) {
-				backoff = 1.0;
-			}
+		final Counter<String> keys = this.bigramCounter
+				.getCounter(previousWord);
+		final double probability;
+		if (keys.getCount(word) > 0) {
+			probability = (keys.getCount(word) - beta) / keys.totalCount();
+		} else {
+			probability = this.alpha.getCount(previousWord)
+					* this.wordCounter.getCount(word)
+					/ this.z.getCount(previousWord);
 		}
-		return unigramProbability * backoff;
+
+		if (probability > 1 || probability <= 0 || Double.isNaN(probability)) {
+			System.err.println("Wrong probabilities. Found " + probability);
+		}
+
+		return probability;
 	}
 
 	@Override
@@ -101,95 +104,45 @@ class KatzBigramLanguageModel implements LanguageModel {
 			probability *= getBigramProbability(previousWord, word);
 			previousWord = word;
 		}
+
 		return probability;
 	}
 
-	private void normalizeDistributions() {
-		final double[] unigramBuckets = new double[cutOff + 2];
-		for (final String word : wordCounter.keySet()) {
-			final double count = wordCounter.getCount(word);
-			if (count <= cutOff + 1) {
-				unigramBuckets[(int) count]++;
-			}
+	public void normalizeDistributions() {
+		// Do 1-smoothing for unknown words
+		this.wordCounter.incrementCount(UNKNOWN, 1);
+		for (final String previousWord : this.wordCounter.keySet()) {
+			this.wordCounter.incrementCount(previousWord, 1);
 		}
 
-		final double[] bigramBuckets = new double[cutOff + 2];
-		for (final String previousWord : bigramCounter.keySet()) {
-			final Counter<String> currentCounter = bigramCounter
+		// alpha, z
+		for (final String previousWord : this.wordCounter.keySet()) {
+			double sum = 0;
+			final Counter<String> ctr = this.bigramCounter
 					.getCounter(previousWord);
-			for (final String word : currentCounter.keySet()) {
-				final double count = currentCounter.getCount(word);
-				if (count <= cutOff + 1) {
-					bigramBuckets[(int) count]++;
+			for (final String word : ctr.keySet()) {
+				if (ctr.getCount(word) > 0) {
+					sum = sum + ctr.getCount(word) - beta;
 				}
 			}
-		}
+			sum = sum / this.wordCounter.getCount(previousWord);
+			this.alpha.incrementCount(previousWord, 1 - sum);
 
-		double normalizer = 1.0 / wordCounter.totalCount();
-		double A = (cutOff + 1) * unigramBuckets[cutOff + 1]
-				/ unigramBuckets[1];
-		for (final String word : wordCounter.keySet()) {
-			final double count = wordCounter.getCount(word);
-			if (count > cutOff) {
-				probabilities.setCount(word, count * normalizer);
-			} else {
-				final double discountedCount = (count + 1)
-						* unigramBuckets[(int) count + 1]
-						/ unigramBuckets[(int) count];
-				final double probability = count * normalizer
-						* (discountedCount / count - A) / (1 - A);
-				probabilities.setCount(word, probability);
-				verifyProbability(probability);
-			}
-		}
-		probabilities.setCount(UNKNOWN, unigramBuckets[1] * normalizer);
-
-		A = (cutOff + 1) * bigramBuckets[cutOff + 1] / bigramBuckets[1];
-		final Counter<String> forwardProbability = new Counter<String>();
-		final Counter<String> backwardProbability = new Counter<String>();
-		for (final String previousWord : bigramCounter.keySet()) {
-			final Counter<String> currentCounter = bigramCounter
-					.getCounter(previousWord);
-			normalizer = 1.0 / currentCounter.totalCount();
-			double probability = 0;
-			double probabilitySoFar = 0;
-			for (final String word : currentCounter.keySet()) {
-				final double count = currentCounter.getCount(word);
-				if (count > cutOff) {
-					probability = count * normalizer;
-				} else {
-					final double discountedCount = (count + 1)
-							* bigramBuckets[(int) count + 1]
-							/ bigramBuckets[(int) count];
-					probability = count * normalizer
-							* (discountedCount / count - A) / (1 - A);
+			double zCount = 0;
+			for (final String word : this.wordCounter.keySet()) {
+				if (ctr.getCount(word) == 0) {
+					zCount = zCount + this.wordCounter.getCount(word);
 				}
-				verifyProbability(probability);
-				probabilities.setCount(previousWord + " " + word, probability);
-				backwardProbability.incrementCount(previousWord,
-						probabilities.getCount(word));
-				probabilitySoFar += probability;
 			}
-			forwardProbability.setCount(previousWord, probabilitySoFar);
-		}
-
-		for (final String word : wordCounter.keySet()) {
-			final double backoff = (1.0 - forwardProbability.getCount(word))
-					/ (1.0 - backwardProbability.getCount(word));
-			// Verify back-off.
-			if (Double.isNaN(backoff) || Double.isInfinite(backoff)
-					|| backoff == 0) {
-				System.err.println("stop: " + backoff);
-			}
-			backoffs.setCount(word, backoff);
+			this.z.incrementCount(previousWord, zCount);
 		}
 	}
 
-	String generateWord() {
+	String generateWord(String previousWord) {
 		final double sample = Math.random();
 		double sum = 0.0;
 		for (final String word : wordCounter.keySet()) {
-			sum += wordCounter.getCount(word);
+			sum += this.getBigramProbability(previousWord, word);
 			if (sum > sample) {
 				return word;
 			}

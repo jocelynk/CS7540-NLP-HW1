@@ -104,6 +104,9 @@ public class LanguageModelTester {
 		} else if (model.equalsIgnoreCase("katz-bigram")) {
 			languageModel = new KatzBigramLanguageModel(
 					trainingSentenceCollection);
+		} else if (model.equalsIgnoreCase("katz-bigram-pp")) {
+			languageModel = new KatzPPBigramLanguageModel(
+					trainingSentenceCollection);
 		} else if (model.equalsIgnoreCase("katz-trigram")) {
 			throw new IllegalStateException(
 					"Katz trigram model not fully implemented -- remove exception and uncomment next line if implemented");
@@ -136,7 +139,7 @@ public class LanguageModelTester {
 	}
 
 	private static void displayHypothesis(String prefix, List<String> guess,
-			SpeechNBestList speechNBestList, LanguageModel languageModel) {
+										  SpeechNBestList speechNBestList, LanguageModel languageModel) {
 		final double acoustic = speechNBestList.getAcousticScore(guess) / 16.0;
 		final double language = Math
 				.log(languageModel.getSentenceProbability(guess));
@@ -146,7 +149,7 @@ public class LanguageModelTester {
 	}
 
 	static double calculatePerplexity(LanguageModel languageModel,
-			Collection<List<String>> sentenceCollection) {
+									  Collection<List<String>> sentenceCollection) {
 		double logProbability = 0.0;
 		double numSymbols = 0.0;
 		for (final List<String> sentence : sentenceCollection) {
@@ -161,7 +164,7 @@ public class LanguageModelTester {
 	}
 
 	static double calculateWordErrorRate(LanguageModel languageModel,
-			List<SpeechNBestList> speechNBestLists, boolean verbose) {
+										 List<SpeechNBestList> speechNBestLists, boolean verbose) {
 		double totalDistance = 0.0;
 		double totalWords = 0.0;
 		final EditDistance editDistance = new EditDistance();
@@ -310,15 +313,15 @@ public class LanguageModelTester {
 		}
 
 		public double getDistance(List<? extends Object> firstList,
-				List<? extends Object> secondList) {
+								  List<? extends Object> secondList) {
 			final double[][] bestDistances = initialize(
 					new double[firstList.size() + 1][secondList.size() + 1]);
 			return getDistance(firstList, secondList, 0, 0, bestDistances);
 		}
 
 		private double getDistance(List<? extends Object> firstList,
-				List<? extends Object> secondList, int firstPosition,
-				int secondPosition, double[][] bestDistances) {
+								   List<? extends Object> secondList, int firstPosition,
+								   int secondPosition, double[][] bestDistances) {
 			if (firstPosition > firstList.size()
 					|| secondPosition > secondList.size()) {
 				return Double.POSITIVE_INFINITY;

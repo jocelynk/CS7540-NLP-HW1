@@ -11,7 +11,7 @@ import nlp.util.*;
  * aligment source to be english and the alignment target to be french (recall
  * that's the direction for translating INTO english in the noisy channel
  * model).
- * 
+ *
  * Your projects will implement several methods of word-to-word alignment.
  */
 public class WordAlignmentTester {
@@ -68,7 +68,7 @@ public class WordAlignmentTester {
 		}
 
 		public SentencePair(int sentenceID, String sourceFile,
-				List<String> englishWords, List<String> frenchWords) {
+							List<String> englishWords, List<String> frenchWords) {
 			this.sentenceID = sentenceID;
 			this.sourceFile = sourceFile;
 			this.englishWords = englishWords;
@@ -82,7 +82,7 @@ public class WordAlignmentTester {
 	 * pairs to one of three values, unaligned, possibly aligned, and surely
 	 * aligned. Your alignment guesses should only contain sure and unaligned
 	 * pairs, but the gold alignments contain possible pairs as well.
-	 * 
+	 *
 	 * To build an alignemnt, start with an empty one and use
 	 * addAlignment(i,j,true). To display one, use the render method.
 	 */
@@ -91,19 +91,19 @@ public class WordAlignmentTester {
 		Set<Pair<Integer, Integer>> possibleAlignments;
 
 		public boolean containsSureAlignment(int englishPosition,
-				int frenchPosition) {
+											 int frenchPosition) {
 			return sureAlignments.contains(new Pair<Integer, Integer>(
 					englishPosition, frenchPosition));
 		}
 
 		public boolean containsPossibleAlignment(int englishPosition,
-				int frenchPosition) {
+												 int frenchPosition) {
 			return possibleAlignments.contains(new Pair<Integer, Integer>(
 					englishPosition, frenchPosition));
 		}
 
 		public void addAlignment(int englishPosition, int frenchPosition,
-				boolean sure) {
+								 boolean sure) {
 			Pair<Integer, Integer> alignment = new Pair<Integer, Integer>(
 					englishPosition, frenchPosition);
 			if (sure)
@@ -117,12 +117,12 @@ public class WordAlignmentTester {
 		}
 
 		public static String render(Alignment alignment,
-				SentencePair sentencePair) {
+									SentencePair sentencePair) {
 			return render(alignment, alignment, sentencePair);
 		}
 
 		public static String render(Alignment reference, Alignment proposed,
-				SentencePair sentencePair) {
+									SentencePair sentencePair) {
 			StringBuilder sb = new StringBuilder();
 			for (int frenchPosition = 0; frenchPosition < sentencePair
 					.getFrenchWords().size(); frenchPosition++) {
@@ -295,8 +295,8 @@ public class WordAlignmentTester {
 	}
 
 	private static void test(WordAligner wordAligner,
-			List<SentencePair> testSentencePairs,
-			Map<Integer, Alignment> testAlignments, boolean verbose) {
+							 List<SentencePair> testSentencePairs,
+							 Map<Integer, Alignment> testAlignments, boolean verbose) {
 		int proposedSureCount = 0;
 		int proposedPossibleCount = 0;
 		int sureCount = 0;
@@ -313,7 +313,7 @@ public class WordAlignmentTester {
 			if (verbose)
 				System.out.println("Alignment:\n"
 						+ Alignment.render(referenceAlignment,
-								proposedAlignment, sentencePair));
+						proposedAlignment, sentencePair));
 			for (int frenchPosition = 0; frenchPosition < sentencePair
 					.getFrenchWords().size(); frenchPosition++) {
 				for (int englishPosition = 0; englishPosition < sentencePair
@@ -341,7 +341,7 @@ public class WordAlignmentTester {
 		System.out.println("Recall: " + proposedSureCount / (double) sureCount);
 		System.out.println("AER: "
 				+ (1.0 - (proposedSureCount + proposedPossibleCount)
-						/ (double) (sureCount + proposedCount)));
+				/ (double) (sureCount + proposedCount)));
 	}
 
 	// BELOW HERE IS IO CODE
@@ -379,7 +379,7 @@ public class WordAlignmentTester {
 	}
 
 	private static List<SentencePair> readSentencePairs(String path,
-			int maxSentencePairs) {
+														int maxSentencePairs) {
 		List<SentencePair> sentencePairs = new ArrayList<SentencePair>();
 		List<String> baseFileNames = getBaseFileNames(path);
 		for (String baseFileName : baseFileNames) {

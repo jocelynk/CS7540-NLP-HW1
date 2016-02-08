@@ -21,8 +21,8 @@ class SpeechNBestList {
 	}
 
 	public SpeechNBestList(List<String> correctSentence,
-			List<List<String>> nBestSentences,
-			Map<List<String>, Double> acousticScores) {
+						   List<List<String>> nBestSentences,
+						   Map<List<String>, Double> acousticScores) {
 		this.correctSentence = correctSentence;
 		this.nBestSentences = nBestSentences;
 		this.acousticScores = acousticScores;
@@ -30,7 +30,7 @@ class SpeechNBestList {
 
 	static class Reader {
 		public static List<SpeechNBestList> readSpeechNBestLists(String path,
-				Set<String> vocabulary) throws IOException {
+																 Set<String> vocabulary) throws IOException {
 			List<SpeechNBestList> speechNBestLists = new ArrayList<SpeechNBestList>();
 			BufferedReader correctSentenceReader = open(path + "/REF.HUB1");
 			Map<String, List<String>> correctSentenceMap = readCorrectSentences(correctSentenceReader);
@@ -62,7 +62,7 @@ class SpeechNBestList {
 			for (int i = 0; i < sentenceList.size(); i++) {
 				List<String> sentence = sentenceList.get(i);
 				if (!inVocabulary(sentence, vocabulary)) // && i <
-															// sentenceList.size()-1)
+					// sentenceList.size()-1)
 					continue;
 				Double score = scoreList.get(i);
 				Double bestScoreForSentence = sentencesToScores.get(sentence);
@@ -89,7 +89,7 @@ class SpeechNBestList {
 		}
 
 		private static boolean equalsIgnoreSpaces(List<String> sentence1,
-				List<String> sentence2) {
+												  List<String> sentence2) {
 			StringBuilder sb1 = new StringBuilder();
 			StringBuilder sb2 = new StringBuilder();
 			for (String word1 : sentence1) {
@@ -102,7 +102,7 @@ class SpeechNBestList {
 		}
 
 		private static boolean inVocabulary(List<String> sentence,
-				Set<String> vocabulary) {
+											Set<String> vocabulary) {
 			for (String word : sentence) {
 				if (!vocabulary.contains(word))
 					return false;

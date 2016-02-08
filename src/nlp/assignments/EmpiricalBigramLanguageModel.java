@@ -46,7 +46,7 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		normalizeDistributions();
 	}
 
-	@Override
+	/*@Override
 	public List<String> generateSentence() {
 		final List<String> sentence = new ArrayList<String>();
 		Object[] keys = bigramCounter.keySet().toArray();
@@ -55,6 +55,17 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		while (!word.equals(STOP)) {
 			sentence.add(word);
 			word = generateBigramWord(word);
+		}
+		return sentence;
+	}*/
+
+	@Override
+	public List<String> generateSentence() {
+		final List<String> sentence = new ArrayList<String>();
+		String word = generateWord(START);
+		while (!word.equals(STOP)) {
+			sentence.add(word);
+			word = generateWord(word);
 		}
 		return sentence;
 	}
@@ -69,8 +80,8 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 
 		//Add Witten-Bell Smoothing
 		Counter<String> counter = bigramCounterUnNorm.getCounter(previousWord);
-		double estLambda = counter.size() != 0? (counter.size()/(counter.size() + counter.totalCount())) : 0;
-		return lambda * bigramCount + (1.0 - lambda) * unigramCount;
+		double estLambda = counter.size() != 0? (1 - counter.size()/(counter.size() + counter.totalCount())) : 0;
+		return estLambda * bigramCount + (1.0 - estLambda) * unigramCount;
 	}
 
 	@Override
@@ -95,7 +106,19 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		wordCounter.normalize();
 	}
 
-	String generateWord() {
+	String generateWord(String previousWord) {
+		final double sample = Math.random();
+		double sum = 0.0;
+		for (final String word : wordCounter.keySet()) {
+			sum += this.getBigramProbability(previousWord, word);
+			if (sum > sample) {
+				return word;
+			}
+		}
+		return UNKNOWN;
+	}
+
+	/*String generateWord() {
 		final double sample = Math.random();
 		double sum = 0.0;
 		for (final String word : wordCounter.keySet()) {
@@ -108,7 +131,7 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 	}
 
 	/**among list of words that follow the given word randomly choose next word**/
-	String generateBigramWord(String key) {
+	/*String generateBigramWord(String key) {
 
 		if(bigramCounter.containsKey(key)) {
 			Counter<String> counter = bigramCounter.getCounter(key);
@@ -123,5 +146,5 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		} else {
 			return generateWord();
 		}
-	}
+	}*/
 }

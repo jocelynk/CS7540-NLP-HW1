@@ -109,7 +109,7 @@ public class POSTaggerTester {
 		}
 
 		public static State buildState(String previousPreviousTag,
-				String previousTag, int position) {
+									   String previousTag, int position) {
 			tempState.setState(previousPreviousTag, previousTag, position);
 			return stateInterner.intern(tempState);
 		}
@@ -175,7 +175,7 @@ public class POSTaggerTester {
 			result = 29
 					* result
 					+ (previousPreviousTag != null ? previousPreviousTag
-							.hashCode() : 0);
+					.hashCode() : 0);
 			return result;
 		}
 
@@ -189,7 +189,7 @@ public class POSTaggerTester {
 		String previousPreviousTag;
 
 		private void setState(String previousPreviousTag, String previousTag,
-				int position) {
+							  int position) {
 			this.previousPreviousTag = previousPreviousTag;
 			this.previousTag = previousTag;
 			this.position = position;
@@ -332,7 +332,7 @@ public class POSTaggerTester {
 			for (int position = 0; position <= taggedSentence.size() + 1; position++) {
 				labeledLocalTrigramContexts.add(new LabeledLocalTrigramContext(
 						words, position, tags.get(position - 2), tags
-								.get(position - 1), tags.get(position)));
+						.get(position - 1), tags.get(position)));
 			}
 			return labeledLocalTrigramContexts;
 		}
@@ -408,7 +408,7 @@ public class POSTaggerTester {
 		}
 
 		public POSTagger(LocalTrigramScorer localTrigramScorer,
-				TrellisDecoder<State> trellisDecoder) {
+						 TrellisDecoder<State> trellisDecoder) {
 			this.localTrigramScorer = localTrigramScorer;
 			this.trellisDecoder = trellisDecoder;
 		}
@@ -450,7 +450,7 @@ public class POSTaggerTester {
 		}
 
 		public LocalTrigramContext(List<String> words, int position,
-				String previousPreviousTag, String previousTag) {
+								   String previousPreviousTag, String previousTag) {
 			this.words = words;
 			this.position = position;
 			this.previousTag = previousTag;
@@ -475,8 +475,8 @@ public class POSTaggerTester {
 		}
 
 		public LabeledLocalTrigramContext(List<String> words, int position,
-				String previousPreviousTag, String previousTag,
-				String currentTag) {
+										  String previousPreviousTag, String previousTag,
+										  String currentTag) {
 			super(words, position, previousPreviousTag, previousTag);
 			this.currentTag = currentTag;
 		}
@@ -512,8 +512,8 @@ public class POSTaggerTester {
 	static class MostFrequentTagScorer implements LocalTrigramScorer {
 
 		boolean restrictTrigrams; // if true, assign log score of
-									// Double.NEGATIVE_INFINITY to illegal tag
-									// trigrams.
+		// Double.NEGATIVE_INFINITY to illegal tag
+		// trigrams.
 
 		CounterMap<String, String> wordsToTags = new CounterMap<String, String>();
 		Counter<String> unknownWordTags = new Counter<String>();
@@ -546,7 +546,7 @@ public class POSTaggerTester {
 		}
 
 		private Set<String> allowedFollowingTags(Set<String> tags,
-				String previousPreviousTag, String previousTag) {
+												 String previousPreviousTag, String previousTag) {
 			Set<String> allowedTags = new HashSet<String>();
 			for (String tag : tags) {
 				String trigramString = makeTrigramString(previousPreviousTag,
@@ -559,7 +559,7 @@ public class POSTaggerTester {
 		}
 
 		private String makeTrigramString(String previousPreviousTag,
-				String previousTag, String currentTag) {
+										 String previousTag, String currentTag) {
 			return previousPreviousTag + " " + previousTag + " " + currentTag;
 		}
 
@@ -595,7 +595,7 @@ public class POSTaggerTester {
 	}
 
 	private static List<TaggedSentence> readTaggedSentences(String path,
-			int low, int high) {
+															int low, int high) {
 		Collection<Tree<String>> trees = PennTreebankReader.readTrees(path,
 				low, high);
 		List<TaggedSentence> taggedSentences = new ArrayList<TaggedSentence>();
@@ -612,8 +612,8 @@ public class POSTaggerTester {
 	}
 
 	private static void evaluateTagger(POSTagger posTagger,
-			List<TaggedSentence> taggedSentences,
-			Set<String> trainingVocabulary, boolean verbose) {
+									   List<TaggedSentence> taggedSentences,
+									   Set<String> trainingVocabulary, boolean verbose) {
 		double numTags = 0.0;
 		double numTagsCorrect = 0.0;
 		double numUnknownWords = 0.0;
@@ -659,8 +659,8 @@ public class POSTaggerTester {
 	// pretty-print a pair of taggings for a sentence, possibly suppressing the
 	// tags which correctly match
 	private static String alignedTaggings(List<String> words,
-			List<String> goldTags, List<String> guessedTags,
-			boolean suppressCorrectTags) {
+										  List<String> goldTags, List<String> guessedTags,
+										  boolean suppressCorrectTags) {
 		StringBuilder goldSB = new StringBuilder("Gold Tags: ");
 		StringBuilder guessedSB = new StringBuilder("Guessed Tags: ");
 		StringBuilder wordSB = new StringBuilder("Words: ");
@@ -682,7 +682,7 @@ public class POSTaggerTester {
 	}
 
 	private static void equalizeLengths(StringBuilder sb1, StringBuilder sb2,
-			StringBuilder sb3) {
+										StringBuilder sb3) {
 		int maxLength = sb1.length();
 		maxLength = Math.max(maxLength, sb2.length());
 		maxLength = Math.max(maxLength, sb3.length());

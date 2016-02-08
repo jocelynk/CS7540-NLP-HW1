@@ -92,7 +92,7 @@ public class CounterMap<K, V> implements java.io.Serializable {
 	/**
 	 * Returns whether or not the <code>CounterMap</code> contains any entries
 	 * for the given key.
-	 * 
+	 *
 	 * @author Aria Haghighi
 	 * @param key
 	 * @return
@@ -178,7 +178,7 @@ public class CounterMap<K, V> implements java.io.Serializable {
 	}
 
 	public CounterMap(MapFactory<K, Counter<V>> outerMF,
-			MapFactory<V, Double> innerMF) {
+					  MapFactory<V, Double> innerMF) {
 		mf = innerMF;
 		counterMap = outerMF.buildMap();
 	}
