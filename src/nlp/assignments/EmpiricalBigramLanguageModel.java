@@ -70,7 +70,7 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		return sentence;
 	}
 
-	public double getBigramProbability(String previousWord, String word) {
+	public double getBigramProbability(String previousWord, String word, Boolean withSmoothing) {
 		final double bigramCount = bigramCounter.getCount(previousWord, word);
 		double unigramCount = wordCounter.getCount(word);
 		if (unigramCount == 0) {
@@ -81,7 +81,10 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		//Add Witten-Bell Smoothing
 		Counter<String> counter = bigramCounterUnNorm.getCounter(previousWord);
 		double estLambda = counter.size() != 0? (1 - counter.size()/(counter.size() + counter.totalCount())) : 0;
-		return estLambda * bigramCount + (1.0 - estLambda) * unigramCount;
+		if(withSmoothing) {
+			return estLambda * bigramCount + (1.0 - estLambda) * unigramCount;
+		} else
+			return lambda * bigramCount + (1.0 - lambda) * unigramCount;
 	}
 
 	@Override
@@ -93,7 +96,7 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		String previousWord = stoppedSentence.get(0);
 		for (int i = 1; i < stoppedSentence.size(); i++) {
 			final String word = stoppedSentence.get(i);
-			probability *= getBigramProbability(previousWord, word);
+			probability *= getBigramProbability(previousWord, word, false);
 			previousWord = word;
 		}
 		return probability;
@@ -110,7 +113,7 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		final double sample = Math.random();
 		double sum = 0.0;
 		for (final String word : wordCounter.keySet()) {
-			sum += this.getBigramProbability(previousWord, word);
+			sum += this.getBigramProbability(previousWord, word, false);
 			if (sum > sample) {
 				return word;
 			}

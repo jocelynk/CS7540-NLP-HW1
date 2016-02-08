@@ -33,7 +33,7 @@ class EmpiricalUnigramLanguageModel implements LanguageModel {
 
 	@Override
 	public List<String> generateSentence() {
-		System.out.println("WARNING -- DUMMY PLACEHOLDER IMPLEMENTATION");
+		//System.out.println("WARNING -- DUMMY PLACEHOLDER IMPLEMENTATION");
 		final List<String> sentence = new ArrayList<String>();
 		String word = generateWord();
 		while (!word.equals(STOP)) {
