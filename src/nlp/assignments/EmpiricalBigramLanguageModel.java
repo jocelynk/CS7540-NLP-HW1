@@ -96,7 +96,7 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		String previousWord = stoppedSentence.get(0);
 		for (int i = 1; i < stoppedSentence.size(); i++) {
 			final String word = stoppedSentence.get(i);
-			probability *= getBigramProbability(previousWord, word, false);
+			probability *= getBigramProbability(previousWord, word, true);
 			previousWord = word;
 		}
 		return probability;
@@ -113,7 +113,7 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		final double sample = Math.random();
 		double sum = 0.0;
 		for (final String word : wordCounter.keySet()) {
-			sum += this.getBigramProbability(previousWord, word, false);
+			sum += this.getBigramProbability(previousWord, word, true);
 			if (sum > sample) {
 				return word;
 			}
@@ -133,8 +133,8 @@ class EmpiricalBigramLanguageModel implements LanguageModel {
 		return UNKNOWN;
 	}
 
-	/**among list of words that follow the given word randomly choose next word**/
-	/*String generateBigramWord(String key) {
+	*//**among list of words that follow the given word randomly choose next word**//*
+	String generateBigramWord(String key) {
 
 		if(bigramCounter.containsKey(key)) {
 			Counter<String> counter = bigramCounter.getCounter(key);

@@ -102,7 +102,7 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 		for (int i = 2; i < stoppedSentence.size(); i++) {
 			final String word = stoppedSentence.get(i);
 			probability *= getTrigramProbability(prePreviousWord, previousWord,
-					word, false);
+					word, true);
 			prePreviousWord = previousWord;
 			previousWord = word;
 		}
@@ -148,7 +148,7 @@ class EmpiricalTrigramLanguageModel implements LanguageModel {
 		final double sample = Math.random();
 		double sum = 0.0;
 		for (final String word : wordCounter.keySet()) {
-			sum += this.getTrigramProbability(prePreviousWord, previousWord, word, false);
+			sum += this.getTrigramProbability(prePreviousWord, previousWord, word, true);
 			if (sum > sample) {
 				return word;
 			}
